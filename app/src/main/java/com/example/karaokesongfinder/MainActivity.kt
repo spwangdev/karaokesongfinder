@@ -1,6 +1,7 @@
 package com.example.karaokesongfinder
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 
 import androidx.activity.compose.setContent
@@ -28,23 +29,75 @@ import entities.api.Song
 import viewmodels.SongSearchViewModel
 
 class MainActivity : ComponentActivity() {
+    private val songSearchViewModel = SongSearchViewModel()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            KaraokeSongFinderTheme {
-//                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-//                    Greeting(
-//                        name = "Android",
-//                        modifier = Modifier.padding(innerPadding)
-//                    )
+//            KaraokeSongFinderTheme {
+//                Surface(
+//                    modifier = Modifier.fillMaxSize(),
+//                    color = MaterialTheme.colorScheme.background
+//                ) {
+//                    KaraokeSearchScreen()
 //                }
-                Surface(
+//            }
+            KaraokeSongFinderTheme() {
+                Surface (
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    // This is where the magic happens! Call your screen here:
-                    KaraokeSearchScreen()
+                    val keyboardController = LocalSoftwareKeyboardController.current
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(14.dp)
+                            .padding(top = 12.dp)
+                    ) {
+                        // 1. Search Inputs
+                        OutlinedTextField(
+                            value = songSearchViewModel.searchQuery,
+                            onValueChange = { nextText -> songSearchViewModel.searchQuery = nextText },
+                            label = { Text("Search by Song or Artist") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        // 2. The Diagnostic Reader (Always visible!)
+                        Text(text = "DEBUG - Query: ${songSearchViewModel.searchQuery}")
+                        Text(text = "DEBUG - Loading: ${songSearchViewModel.isLoading}")
+
+                        Button(
+                            onClick = {
+                                keyboardController?.hide()
+                                if (songSearchViewModel.searchQuery.isNotBlank()){
+                                    songSearchViewModel.performSearch()
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Find Karaoke Tracks")
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // 2. Loading Indicator or Results List
+                        if (songSearchViewModel.isLoading) {
+                            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                            Log.d("karaoke", "loading thing")
+//        } else {
+//            LazyColumn(
+//                verticalArrangement = Arrangement.spacedBy(8.dp),
+//                modifier = Modifier.fillMaxSize()
+//            ) {
+//                items(viewModel.songList.value) { song ->
+//                    SongRow(song = song)
+//                }
+//            }
+                        }
+                    }
                 }
             }
         }
@@ -55,6 +108,7 @@ class MainActivity : ComponentActivity() {
 fun KaraokeSearchScreen(viewModel: SongSearchViewModel = SongSearchViewModel()) {
     var localSearchQuery by remember { mutableStateOf("") }
     val keyboardController = LocalSoftwareKeyboardController.current
+    Log.d("karaoke", "redrawn screen ${viewModel.isLoading}")
 
     Column(
         modifier = Modifier
@@ -72,11 +126,15 @@ fun KaraokeSearchScreen(viewModel: SongSearchViewModel = SongSearchViewModel()) 
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // 2. The Diagnostic Reader (Always visible!)
+        Text(text = "DEBUG - Query: ${viewModel.searchQuery}")
+        Text(text = "DEBUG - Loading: ${viewModel.isLoading}")
+
         Button(
             onClick = {
                 keyboardController?.hide()
                 if (localSearchQuery.isNotBlank()){
-                    viewModel.performSearch(localSearchQuery)
+                    viewModel.performSearch()
                 }
             },
             modifier = Modifier.fillMaxWidth()
@@ -87,17 +145,18 @@ fun KaraokeSearchScreen(viewModel: SongSearchViewModel = SongSearchViewModel()) 
         Spacer(modifier = Modifier.height(16.dp))
 
         // 2. Loading Indicator or Results List
-        if (viewModel.isLoading.value) {
+        if (viewModel.isLoading) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
-        } else {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                items(viewModel.songList.value) { song ->
-                    SongRow(song = song)
-                }
-            }
+            Log.d("karaoke", "loading thing")
+//        } else {
+//            LazyColumn(
+//                verticalArrangement = Arrangement.spacedBy(8.dp),
+//                modifier = Modifier.fillMaxSize()
+//            ) {
+//                items(viewModel.songList.value) { song ->
+//                    SongRow(song = song)
+//                }
+//            }
         }
     }
 }
