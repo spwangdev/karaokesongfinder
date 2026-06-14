@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">KaraokeSongFinder</string>
-    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_main">Song Finder</string>
 </resources>
