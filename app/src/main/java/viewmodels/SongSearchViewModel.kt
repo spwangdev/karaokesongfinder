@@ -1,7 +1,10 @@
 package viewmodels
 
+import android.util.Log
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import entities.api.Song
@@ -10,10 +13,11 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import services.api.KaraokeApiService
 import kotlin.collections.emptyList
+import kotlin.math.log
 
 class SongSearchViewModel : ViewModel() {
     // UI States
-    var searchQuery = mutableStateOf("")
+    var searchQuery by mutableStateOf("")
     var songList = mutableStateOf<List<Song>>(emptyList())
     var isLoading = mutableStateOf(false)
 
@@ -28,20 +32,21 @@ class SongSearchViewModel : ViewModel() {
     }
 
     // Function called when user clicks "Search"
-    fun performSearch() {
-        if (searchQuery.value.isBlank()) return
-
-        viewModelScope.launch {
-            isLoading.value = true
-            try {
-                val results = apiService.searchSongs(searchQuery.value)
-                songList.value = results
-                // Handle errors gracefully in production
-            } catch (e: Exception) {
-                e.printStackTrace()
-            } finally {
-                isLoading.value = false
-            }
-        }
+    fun performSearch(searchQuery: String) {
+        Log.d("KaraokeTest","inside perform search: $searchQuery")
+//        if (searchQuery.isBlank()) return
+//
+//        viewModelScope.launch {
+//            isLoading.value = true
+//            try {
+//                val results = apiService.searchSongs(searchQuery)
+//                songList.value = results
+//                // Handle errors gracefully in production
+//            } catch (e: Exception) {
+//                e.printStackTrace()
+//            } finally {
+//                isLoading.value = false
+//            }
+//        }
     }
 }

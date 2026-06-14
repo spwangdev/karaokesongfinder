@@ -17,7 +17,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import entities.api.Song
 import viewmodels.SongSearchViewModel
@@ -48,6 +53,9 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun KaraokeSearchScreen(viewModel: SongSearchViewModel = SongSearchViewModel()) {
+    var localSearchQuery by remember { mutableStateOf("") }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -56,8 +64,8 @@ fun KaraokeSearchScreen(viewModel: SongSearchViewModel = SongSearchViewModel()) 
     ) {
         // 1. Search Inputs
         OutlinedTextField(
-            value = viewModel.searchQuery.value,
-            onValueChange = { nextText -> viewModel.searchQuery.value = nextText },
+            value = localSearchQuery,
+            onValueChange = { nextText -> localSearchQuery = nextText },
             label = { Text("Search by Song or Artist") },
             modifier = Modifier.fillMaxWidth()
         )
@@ -65,7 +73,12 @@ fun KaraokeSearchScreen(viewModel: SongSearchViewModel = SongSearchViewModel()) 
         Spacer(modifier = Modifier.height(8.dp))
 
         Button(
-            onClick = { viewModel.performSearch() },
+            onClick = {
+                keyboardController?.hide()
+                if (localSearchQuery.isNotBlank()){
+                    viewModel.performSearch(localSearchQuery)
+                }
+            },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Find Karaoke Tracks")
