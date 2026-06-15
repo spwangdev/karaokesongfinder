@@ -1,7 +1,11 @@
 package com.example.karaokesongfinder
 
+import android.content.Context
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -18,6 +22,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material3.*
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -147,108 +152,56 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun KaraokeSearchScreen(viewModel: SongSearchViewModel = SongSearchViewModel()) {
-    var localSearchQuery by remember { mutableStateOf("") }
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val context = LocalContext.current
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(14.dp)
-            .padding(top = 12.dp)
-    ) {
-        // 1. Search Inputs
-        OutlinedTextField(
-            value = localSearchQuery,
-            onValueChange = { nextText -> localSearchQuery = nextText },
-            label = { Text("Search by Song or Artist") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // 2. The Diagnostic Reader (Always visible!)
-        Text(text = "DEBUG - Query: ${viewModel.searchQuery}")
-        Text(text = "DEBUG - Loading: ${viewModel.isLoading}")
-
-        Button(
-            onClick = {
-                keyboardController?.hide()
-                if (localSearchQuery.isNotBlank() && viewModel.isNetworkAvailable(context)){
-                    viewModel.performSearch()
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Find Karaoke Tracks")
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // 2. Loading Indicator or Results List
-        if (viewModel.isLoading) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
-            Log.d("karaoke", "loading thing")
-//        } else {
-//            LazyColumn(
-//                verticalArrangement = Arrangement.spacedBy(8.dp),
-//                modifier = Modifier.fillMaxSize()
-//            ) {
-//                items(viewModel.songList.value) { song ->
-//                    SongRow(song = song)
-//                }
-//            }
-        }
-    }
-}
-
-@Composable
 fun SongRow(song: Song) {
+    val context = LocalContext.current
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = song.title, style = MaterialTheme.typography.titleMedium)
-            Text(text = "by ${song.singer}", style = MaterialTheme.typography.bodyMedium)
-            Text(text = "No. ${song.no}", style = MaterialTheme.typography.bodyMedium)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(end = 40.dp)
+            ) {
+                Text(
+                    text = song.title,
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = "Artist: ${song.singer}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray
+                )
+                Text(
+                    text = "No. ${song.no}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            IconButton(
+                onClick = {
+                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    val clip = ClipData.newPlainText("Song Number", song.no.toString())
+                    clipboard.setPrimaryClip(clip)
+                    //Toast.makeText(context, "Copied song number: ${song.no}", Toast.LENGTH_SHORT).show()
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .size(32.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ContentCopy,
+                    contentDescription = "Copy Song Number",
+                    tint = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
         }
-    }
-}
-
-@Composable
-fun ErrorCard(message: String) {
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFFDE8E8) // Light red background
-        ),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 16.dp),
-        border = BorderStroke(1.dp, Color(0xFFE53E3E)) // Darker red border
-    ) {
-        Text(
-            text = message,
-            color = Color(0xFFC53030), // Dark red text
-            modifier = Modifier.padding(16.dp),
-            style = MaterialTheme.typography.bodyMedium
-        )
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    KaraokeSongFinderTheme {
-        Greeting("Android")
     }
 }
