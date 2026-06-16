@@ -20,6 +20,7 @@ import com.example.karaokesongfinder.ui.theme.KaraokeSongFinderTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.ContentCopy
@@ -35,7 +36,16 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalFocusManager // <-- ADD THIS IMPORT
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import entities.api.Song
+import screens.FavoritesScreen
+import screens.SongSearchScreen
+import sealed.Screen
 import viewmodels.SongSearchViewModel
 
 class MainActivity : ComponentActivity() {
@@ -45,162 +55,107 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            KaraokeSongFinderTheme() {
-                Surface (
+            KaraokeSongFinderTheme {
+                Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val keyboardController = LocalSoftwareKeyboardController.current
-                    val context = LocalContext.current
-                    val focusManager = LocalFocusManager.current
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(14.dp)
-                            .padding(top = 12.dp)
-                    ) {
-                        // 1. Search Inputs
-                        OutlinedTextField(
-                            value = songSearchViewModel.searchQuery,
-                            onValueChange = { nextText -> songSearchViewModel.searchQuery = nextText },
-                            label = { Text("Search by Song or Artist") },
-                            modifier = Modifier.fillMaxWidth(),
+                    val navController = rememberNavController()
+                    val navBackStackEntry by navController.currentBackStackEntryAsState()
+                    val currentRoute = navBackStackEntry?.destination?.route
+                    val items = listOf(Screen.Search, Screen.Favorites)
 
-                            trailingIcon = {
-                                // Only show the 'X' button if the user has actually typed something
-                                if (songSearchViewModel.searchQuery .isNotEmpty()) {
-                                    IconButton(onClick = {
-                                        songSearchViewModel.searchQuery = ""
-                                    }) {
-                                        Icon(
-                                            imageVector = Icons.Default.Clear,
-                                            contentDescription = "Clear search text"
-                                        )
+                    Scaffold(
+                        bottomBar = {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .navigationBarsPadding()
+                                    .padding(bottom = 16.dp, start = 36.dp, end = 36.dp), // Controls the float spacing
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Card(
+                                    shape = RoundedCornerShape(28.dp), // Fully rounded capsule look
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = Color(0xFF2D3748).copy(alpha = 0.88f)
+                                    ),
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                                    border = BorderStroke(
+                                        width = 1.dp,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
+                                    ),
+                                    modifier = Modifier.width(320.dp)
+                                ) {
+                                    NavigationBar(
+                                        containerColor = Color.Transparent,
+                                        tonalElevation = 0.dp,
+                                        modifier = Modifier.padding(horizontal = 8.dp).height(68.dp),
+                                    ) {
+                                        items.forEach { screen ->
+                                            val isSelected = currentRoute == screen.route
+
+                                            NavigationBarItem(
+                                                icon = { Icon(screen.icon, contentDescription = screen.title) },
+                                                label = {
+                                                    Text(
+                                                        text = screen.title,
+                                                        style = MaterialTheme.typography.labelSmall.copy(
+                                                            fontSize = 8.sp,
+                                                            letterSpacing = 0.5.sp,
+                                                            lineHeight = 8.sp
+                                                        )
+                                                    )
+                                                },
+                                                //alwaysShowLabel = false,
+                                                selected = isSelected,
+                                                colors = NavigationBarItemDefaults.colors(
+                                                    selectedIconColor = MaterialTheme.colorScheme.primary,
+                                                    selectedTextColor = MaterialTheme.colorScheme.primary,
+                                                    indicatorColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                                                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                                ),
+                                                onClick = {
+                                                    if (currentRoute != screen.route) {
+                                                        navController.navigate(screen.route) {
+                                                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                                            launchSingleTop = true
+                                                            restoreState = true
+                                                        }
+                                                    }
+                                                }
+                                            )
+                                        }
                                     }
                                 }
                             }
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        // 2. The Diagnostic Reader (Always visible!)
-                        Text(text = "DEBUG - Query: ${songSearchViewModel.searchQuery}")
-                        Text(text = "DEBUG - Loading: ${songSearchViewModel.isLoading}")
-                        Text(text = "DEBUG - Network: ${songSearchViewModel.hasNetwork}")
-
-                        Button(
-                            onClick = {
-                                keyboardController?.hide()
-                                focusManager.clearFocus()
-                                songSearchViewModel.hasNetwork = songSearchViewModel.isNetworkAvailable(context)
-
-                                if (songSearchViewModel.hasNetwork && songSearchViewModel.searchQuery.isNotBlank()){
-                                    songSearchViewModel.performSearch()
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth()
+                        }
+                    ) { innerPadding ->
+                        NavHost(
+                            navController = navController,
+                            startDestination = Screen.Search.route,
+                            modifier = Modifier.padding(top = innerPadding.calculateTopPadding())
+                                               .fillMaxSize()
                         ) {
-                            Text("Search karaoke songs")
-                        }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        // 2. Loading Indicator or Results List
-                        if (!songSearchViewModel.hasNetwork) {
-                            Box(
-                                modifier = Modifier.fillMaxWidth().weight(1f),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "No network connectivity.",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = Color.Red
+                            composable(Screen.Search.route) {
+                                SongSearchScreen(
+                                    songSearchViewModel = songSearchViewModel,
+                                    onNavigateToFavorites = {
+                                        navController.navigate(Screen.Favorites.route)
+                                    }
                                 )
                             }
-                        }
-                        else if (songSearchViewModel.isLoading) {
-                            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
-                            Log.d("karaoke", "loading thing")
-                        }
-                        else if (songSearchViewModel.hasSearched && songSearchViewModel.songList.isEmpty()) {
-                            Box(
-                                modifier = Modifier.fillMaxWidth().weight(1f),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "No results found.",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = Color.Gray
+
+                            composable(Screen.Favorites.route) {
+                                FavoritesScreen(
+                                    onBackClicked = {
+                                        navController.popBackStack()
+                                    }
                                 )
-                            }
-                        }
-                        else {
-                            LazyColumn(
-                                verticalArrangement = Arrangement.spacedBy(8.dp),
-                                modifier = Modifier.fillMaxSize()
-                            ) {
-                                items(songSearchViewModel.songList) { song ->
-                                    SongRow(song = song)
-                                }
                             }
                         }
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-fun SongRow(song: Song) {
-    val context = LocalContext.current
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(end = 40.dp)
-            ) {
-                Text(
-                    text = song.title,
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Text(
-                    text = "Artist: ${song.singer}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray
-                )
-                Text(
-                    text = "No. ${song.no}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-
-            IconButton(
-                onClick = {
-                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    val clip = ClipData.newPlainText("Song Number", song.no.toString())
-                    clipboard.setPrimaryClip(clip)
-                    //Toast.makeText(context, "Copied song number: ${song.no}", Toast.LENGTH_SHORT).show()
-                },
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .size(32.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ContentCopy,
-                    contentDescription = "Copy Song Number",
-                    tint = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.size(18.dp)
-                )
             }
         }
     }
