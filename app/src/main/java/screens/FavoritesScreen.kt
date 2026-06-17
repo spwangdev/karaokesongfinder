@@ -9,12 +9,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,7 +26,20 @@ import viewmodels.SongSearchViewModel
 @Composable
 fun FavoritesScreen(viewModel: SongSearchViewModel) {
     val favoriteSongs by viewModel.favoriteSongs.collectAsState()
+    var filterQuery by remember { mutableStateOf("") }
     val context = LocalContext.current
+
+    val filteredSongs = remember(favoriteSongs, filterQuery) {
+        if (filterQuery.isBlank()) {
+            favoriteSongs
+        } else {
+            favoriteSongs.filter {
+                it.title.contains(filterQuery, ignoreCase = true) ||
+                        it.singer.contains(filterQuery, ignoreCase = true) ||
+                        it.no.contains(filterQuery)
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -43,8 +55,26 @@ fun FavoritesScreen(viewModel: SongSearchViewModel) {
                 color = MaterialTheme.colorScheme.primary
             ),
             maxLines = 1,
-            modifier = Modifier.padding(bottom = 5.dp)
+            modifier = Modifier.padding(bottom = 1.dp)
         )
+
+        if (favoriteSongs.isNotEmpty()) {
+            OutlinedTextField(
+                value = filterQuery,
+                onValueChange = { filterQuery = it },
+                label = { Text("Filter by song, artist, or no.") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                trailingIcon = {
+                    if (filterQuery.isNotEmpty()) {
+                        IconButton(onClick = { filterQuery = "" }) {
+                            Icon(imageVector = Icons.Default.Clear, contentDescription = "Clear")
+                        }
+                    }
+                }
+            )
+        }
 
         if (favoriteSongs.isEmpty()) {
             Box(
@@ -53,13 +83,20 @@ fun FavoritesScreen(viewModel: SongSearchViewModel) {
             ) {
                 Text(text = "No saved songs yet.", color = Color.Gray)
             }
+        } else if (filteredSongs.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxWidth().weight(1f),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = "No songs match your filter.", color = Color.Gray)
+            }
         } else {
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth().weight(1f),
                 contentPadding = PaddingValues(bottom = 90.dp) // Passes right under floating glass nav bar
             ) {
-                items(favoriteSongs) { savedSong ->
+                items(filteredSongs) { savedSong ->
                     Card(modifier = Modifier.fillMaxWidth()) {
                         Box(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
 
