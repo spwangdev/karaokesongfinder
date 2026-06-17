@@ -34,7 +34,7 @@ fun FavoritesScreen(viewModel: SongSearchViewModel) {
     var songToDelete by remember { mutableStateOf<SavedSong?>(null) }
 
     val filteredSongs = remember(favoriteSongs, filterQuery) {
-        if (filterQuery.isBlank()) {
+        val filtered = if (filterQuery.isBlank()) {
             favoriteSongs
         } else {
             favoriteSongs.filter {
@@ -43,6 +43,7 @@ fun FavoritesScreen(viewModel: SongSearchViewModel) {
                         it.no.contains(filterQuery)
             }
         }
+        filtered.sortedBy { it.title }
     }
 
     if (songToDelete != null) {
