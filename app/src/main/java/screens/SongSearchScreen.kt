@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,6 +20,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -30,13 +33,17 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.karaokesongfinder.ui.theme.KaraokeSongFinderTheme
 import entities.api.Song
 import viewmodels.SongSearchViewModel
@@ -57,10 +64,20 @@ fun SongSearchScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(14.dp)
-                    .padding(top = 12.dp)
+                    .padding(12.dp)
+                    .padding(top = 8.dp)
             ) {
-                // 1. Search Inputs
+                Text(
+                    text = "Karaoke Song Finder",
+                    style = MaterialTheme.typography.headlineLarge.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 28.sp,
+                        letterSpacing = 0.5.sp,
+                        color = MaterialTheme.colorScheme.primary
+                    ),
+                    maxLines = 1,
+                    modifier = Modifier.padding(bottom = 3.dp)
+                )
                 OutlinedTextField(
                     value = songSearchViewModel.searchQuery,
                     onValueChange = { nextText -> songSearchViewModel.searchQuery = nextText },
@@ -81,14 +98,7 @@ fun SongSearchScreen(
                         }
                     }
                 )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // 2. The Diagnostic Reader (Always visible!)
-                Text(text = "DEBUG - Query: ${songSearchViewModel.searchQuery}")
-                Text(text = "DEBUG - Loading: ${songSearchViewModel.isLoading}")
-                Text(text = "DEBUG - Network: ${songSearchViewModel.hasNetwork}")
-
+                Spacer(modifier = Modifier.height(4.dp))
                 Button(
                     onClick = {
                         keyboardController?.hide()
@@ -102,7 +112,7 @@ fun SongSearchScreen(
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Search karaoke songs")
+                    Text("Search")
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -140,7 +150,7 @@ fun SongSearchScreen(
                         contentPadding = PaddingValues(bottom = 90.dp)
                     ) {
                         items(songSearchViewModel.songList) { song ->
-                            SongRow(song = song)
+                            SongRow(song = song, songSearchViewModel)
                         }
                     }
                 }
@@ -150,21 +160,23 @@ fun SongSearchScreen(
 }
 
 @Composable
-fun SongRow(song: Song) {
+fun SongRow(song: Song, viewModel: SongSearchViewModel) {
     val context = LocalContext.current
+    val favoriteList by viewModel.favoriteSongs.collectAsState()
+    val isFavorited = favoriteList.any { it.no == song.no }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
-        Box(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp)
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(end = 40.dp)
+                modifier = Modifier.weight(1f)
             ) {
                 Text(
                     text = song.title,
@@ -183,16 +195,25 @@ fun SongRow(song: Song) {
             }
 
             IconButton(
+                onClick = { viewModel.toggleFavorite(song) },
+                modifier = Modifier.size(32.dp)
+            ) {
+                Icon(
+                    imageVector = if (isFavorited) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                    contentDescription = "Toggle Favorite",
+                    tint = if (isFavorited) Color(0xFFE53E3E) else MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+
+            IconButton(
                 onClick = {
                     val clipboard =
                         context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    val clip = ClipData.newPlainText("Song Number", song.no.toString())
+                    val clip = ClipData.newPlainText("Song Number", song.no)
                     clipboard.setPrimaryClip(clip)
-                    //Toast.makeText(context, "Copied song number: ${song.no}", Toast.LENGTH_SHORT).show()
                 },
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .size(32.dp)
+                modifier = Modifier.size(32.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.ContentCopy,

@@ -1,5 +1,6 @@
 package viewmodels
 
+import android.app.Application
 import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.MutableState
@@ -10,9 +11,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import androidx.lifecycle.AndroidViewModel
+import database.AppDatabase
+import database.SavedSong
 import entities.api.Song
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import services.api.KaraokeApiService
@@ -20,7 +27,17 @@ import kotlin.collections.emptyList
 import kotlin.math.log
 import kotlin.time.Duration.Companion.milliseconds
 
-class SongSearchViewModel : ViewModel() {
+class SongSearchViewModel(application: Application) : AndroidViewModel(application) {
+    private val db = AppDatabase.getDatabase(application)
+    private val dao = db.savedSongDao()
+
+    val favoriteSongs: StateFlow<List<SavedSong>> = dao.getAllFavorites()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
     // UI States
     var searchQuery by mutableStateOf("")
     var songList by mutableStateOf<List<Song>>(emptyList())
@@ -64,5 +81,26 @@ class SongSearchViewModel : ViewModel() {
         // Verify that the network has actual internet transit capability
         Log.d("karaoke", capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).toString())
         return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+    }
+
+    fun isSongFavorited(songNo: String): Boolean {
+        return favoriteSongs.value.any { it.no == songNo }
+    }
+
+    fun toggleFavorite(song: Song) {
+        viewModelScope.launch {
+            val savedSong = SavedSong(no = song.no, title = song.title, singer = song.singer)
+            if (isSongFavorited(song.no)) {
+                dao.deleteFavorite(savedSong)
+            } else {
+                dao.insertFavorite(savedSong)
+            }
+        }
+    }
+
+    fun removeFromFavorites(savedSong: SavedSong) {
+        viewModelScope.launch {
+            dao.deleteFavorite(savedSong)
+        }
     }
 }

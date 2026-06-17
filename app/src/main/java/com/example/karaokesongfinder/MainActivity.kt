@@ -3,12 +3,15 @@ package com.example.karaokesongfinder
 import android.content.Context
 import android.content.ClipData
 import android.content.ClipboardManager
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -49,7 +52,14 @@ import sealed.Screen
 import viewmodels.SongSearchViewModel
 
 class MainActivity : ComponentActivity() {
-    private val songSearchViewModel = SongSearchViewModel()
+    private val songSearchViewModel: SongSearchViewModel by viewModels {
+        object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return SongSearchViewModel(application) as T
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -148,9 +158,7 @@ class MainActivity : ComponentActivity() {
 
                             composable(Screen.Favorites.route) {
                                 FavoritesScreen(
-                                    onBackClicked = {
-                                        navController.popBackStack()
-                                    }
+                                    viewModel = songSearchViewModel
                                 )
                             }
                         }
