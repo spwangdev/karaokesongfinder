@@ -58,13 +58,19 @@ class SongSearchViewModel(application: Application) : AndroidViewModel(applicati
     // Function called when user clicks "Search"
     fun performSearch() {
         isLoading = true
+        hasSearched = false // Reset searched state at start
+        songList = emptyList() // Clear previous results immediately
+        
         viewModelScope.launch {
             try {
                 val results = apiService.searchSongs(searchQuery)
-                songList = results
+                // Filter out any potential nulls or malformed results if necessary,
+                // but primarily just assign what the API returns.
+                songList = results ?: emptyList()
                 hasSearched = true
             } catch (e: Exception) {
-                e.printStackTrace()
+                songList = emptyList()
+                hasSearched = true // Still set to true so "No results" or error could be shown
             } finally {
                 isLoading = false
             }
