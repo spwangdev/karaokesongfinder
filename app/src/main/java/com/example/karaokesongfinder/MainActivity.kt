@@ -12,6 +12,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -144,6 +147,10 @@ class MainActivity : ComponentActivity() {
                         NavHost(
                             navController = navController,
                             startDestination = Screen.Search.route,
+                            enterTransition = { fadeIn(animationSpec = tween(150)) },
+                            exitTransition = { fadeOut(animationSpec = tween(150)) },
+                            popEnterTransition = { fadeIn(animationSpec = tween(150)) },
+                            popExitTransition = { fadeOut(animationSpec = tween(150)) },
                             modifier = Modifier.padding(top = innerPadding.calculateTopPadding())
                                                .fillMaxSize()
                         ) {
