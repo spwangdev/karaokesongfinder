@@ -6,7 +6,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface KaraokeApiService {
-    @GET("{searchTerm}/tj.json")
+    @GET("song/{searchTerm}/tj.json")
     suspend fun searchSongs(
         @Path("searchTerm") query: String
     ): List<Song>
