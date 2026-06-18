@@ -50,6 +50,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import entities.api.Song
 import screens.FavoritesScreen
+import screens.LatestSongsScreen
 import screens.SongSearchScreen
 import sealed.Screen
 import viewmodels.SongSearchViewModel
@@ -76,7 +77,7 @@ class MainActivity : ComponentActivity() {
                     val navController = rememberNavController()
                     val navBackStackEntry by navController.currentBackStackEntryAsState()
                     val currentRoute = navBackStackEntry?.destination?.route
-                    val items = listOf(Screen.Search, Screen.Favorites)
+                    val items = listOf(Screen.Search, Screen.Latest, Screen.Favorites)
 
                     Scaffold(
                         bottomBar = {
@@ -160,6 +161,12 @@ class MainActivity : ComponentActivity() {
                                     onNavigateToFavorites = {
                                         navController.navigate(Screen.Favorites.route)
                                     }
+                                )
+                            }
+
+                            composable(Screen.Latest.route) {
+                                LatestSongsScreen(
+                                    viewModel = songSearchViewModel
                                 )
                             }
 

@@ -17,8 +17,10 @@ import database.SavedSong
 import entities.api.Song
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -46,10 +48,19 @@ class SongSearchViewModel(application: Application) : AndroidViewModel(applicati
     var hasSearched by mutableStateOf(false)
     var hasNetwork by mutableStateOf(true)
 
+    // Latest Songs UI States
+    private val _latestSongs = MutableStateFlow<List<Song>>(emptyList())
+    val latestSongs = _latestSongs.asStateFlow()
+
+    private val _isLatestLoading = MutableStateFlow(false)
+    val isLatestLoading = _isLatestLoading.asStateFlow()
+
+    private var lastFetchedDate: String? = null
+
     // Initialize Retrofit
     private val apiService: KaraokeApiService by lazy {
         Retrofit.Builder()
-            .baseUrl("https://api.manana.kr/karaoke/song/")
+            .baseUrl("https://api.manana.kr/karaoke/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(KaraokeApiService::class.java)
@@ -107,6 +118,25 @@ class SongSearchViewModel(application: Application) : AndroidViewModel(applicati
     fun removeFromFavorites(savedSong: SavedSong) {
         viewModelScope.launch {
             dao.deleteFavorite(savedSong)
+        }
+    }
+
+    fun fetchLatestSongs(date: String) {
+        if (date == lastFetchedDate && _latestSongs.value.isNotEmpty()) return
+
+        _isLatestLoading.value = true
+        viewModelScope.launch {
+            try {
+                val results = apiService.getLatestSongs(date)
+                _latestSongs.value = results
+                lastFetchedDate = date
+            } catch (e: Exception) {
+                Log.e("SongSearchViewModel", "Failed to fetch latest songs", e)
+                _latestSongs.value = emptyList()
+                lastFetchedDate = null
+            } finally {
+                _isLatestLoading.value = false
+            }
         }
     }
 }
