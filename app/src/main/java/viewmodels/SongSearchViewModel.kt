@@ -42,6 +42,7 @@ class SongSearchViewModel(application: Application) : AndroidViewModel(applicati
 
     // UI States
     var searchQuery by mutableStateOf("")
+    var searchBySinger by mutableStateOf(false)
     var songList by mutableStateOf<List<Song>>(emptyList())
     var isLoading by mutableStateOf(false)
 
@@ -74,7 +75,11 @@ class SongSearchViewModel(application: Application) : AndroidViewModel(applicati
         
         viewModelScope.launch {
             try {
-                val results = apiService.searchSongs(searchQuery)
+                val results = if (searchBySinger) {
+                    apiService.searchBySinger(searchQuery)
+                } else {
+                    apiService.searchSongs(searchQuery)
+                }
                 // Filter out any potential nulls or malformed results if necessary,
                 // but primarily just assign what the API returns.
                 songList = results ?: emptyList()

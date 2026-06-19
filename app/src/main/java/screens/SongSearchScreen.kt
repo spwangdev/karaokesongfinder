@@ -30,6 +30,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -40,6 +42,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -87,7 +92,7 @@ fun SongSearchScreen(
                 OutlinedTextField(
                     value = songSearchViewModel.searchQuery,
                     onValueChange = { nextText -> songSearchViewModel.searchQuery = nextText },
-                    label = { Text("Search by Song or Artist") },
+                    label = { Text(if (songSearchViewModel.searchBySinger) "Search by Singer" else "Search by Song") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     shape = RoundedCornerShape(24.dp),
@@ -130,24 +135,44 @@ fun SongSearchScreen(
                         }
                     }
                 )
-                Spacer(modifier = Modifier.height(4.dp))
-                Button(
-                    onClick = {
-                        keyboardController?.hide()
-                        focusManager.clearFocus()
-                        songSearchViewModel.hasNetwork =
-                            songSearchViewModel.isNetworkAvailable(context)
 
-                        if (songSearchViewModel.hasNetwork && songSearchViewModel.searchQuery.isNotBlank()) {
-                            songSearchViewModel.performSearch()
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth()
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("Search")
+                    FilterChip(
+                        selected = !songSearchViewModel.searchBySinger,
+                        onClick = { songSearchViewModel.searchBySinger = false },
+                        label = { Text("Song") },
+                        leadingIcon = if (!songSearchViewModel.searchBySinger) {
+                            {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                )
+                            }
+                        } else null
+                    )
+                    FilterChip(
+                        selected = songSearchViewModel.searchBySinger,
+                        onClick = { songSearchViewModel.searchBySinger = true },
+                        label = { Text("Singer") },
+                        leadingIcon = if (songSearchViewModel.searchBySinger) {
+                            {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                )
+                            }
+                        } else null
+                    )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(2.dp))
 
                 // 2. Loading Indicator or Results List
                 if (!songSearchViewModel.hasNetwork) {
@@ -163,7 +188,6 @@ fun SongSearchScreen(
                     }
                 } else if (songSearchViewModel.isLoading) {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
-                    Log.d("karaoke", "loading thing")
                 } else if (songSearchViewModel.hasSearched && songSearchViewModel.songList.isEmpty()) {
                     Box(
                         modifier = Modifier.fillMaxWidth().weight(1f),
