@@ -128,7 +128,8 @@ class SongSearchViewModel(application: Application) : AndroidViewModel(applicati
         viewModelScope.launch {
             try {
                 val results = apiService.getLatestSongs(date)
-                _latestSongs.value = results
+                // Filter only for brand "tj"
+                _latestSongs.value = results.filter { it.brand.equals("tj", ignoreCase = true) }
                 lastFetchedDate = date
             } catch (e: Exception) {
                 Log.e("SongSearchViewModel", "Failed to fetch latest songs", e)
