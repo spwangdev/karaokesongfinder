@@ -21,6 +21,9 @@ interface SavedSongDao {
 
     @Delete
     suspend fun deleteFavorite(song: SavedSong)
+
+    @Query("DELETE FROM favorites_table")
+    suspend fun deleteAllFavorites()
 }
 
 @Database(entities = [SavedSong::class], version = 1, exportSchema = false)

@@ -121,6 +121,12 @@ class SongSearchViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
+    fun clearAllFavorites() {
+        viewModelScope.launch {
+            dao.deleteAllFavorites()
+        }
+    }
+
     fun fetchLatestSongs(date: String) {
         if (date == lastFetchedDate && _latestSongs.value.isNotEmpty()) return
 
