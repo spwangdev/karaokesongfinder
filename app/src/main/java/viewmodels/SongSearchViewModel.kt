@@ -99,9 +99,6 @@ class SongSearchViewModel(application: Application) : AndroidViewModel(applicati
         // Get the currently active network configuration
         val activeNetwork = connectivityManager.activeNetwork ?: return false
         val capabilities = connectivityManager.getNetworkCapabilities(activeNetwork) ?: return false
-
-        // Verify that the network has actual internet transit capability
-        Log.d("karaoke", capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).toString())
         return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 
@@ -140,7 +137,7 @@ class SongSearchViewModel(application: Application) : AndroidViewModel(applicati
             try {
                 val results = apiService.getLatestSongs(date)
                 // Filter only for brand "tj"
-                _latestSongs.value = results.filter { it.brand.equals("tj", ignoreCase = true) }
+                _latestSongs.value = results
                 lastFetchedDate = date
             } catch (e: Exception) {
                 Log.e("SongSearchViewModel", "Failed to fetch latest songs", e)

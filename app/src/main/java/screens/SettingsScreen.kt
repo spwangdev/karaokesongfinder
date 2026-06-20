@@ -70,6 +70,7 @@ fun SettingsScreen(viewModel: SongSearchViewModel) {
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(text = "Version: 1.1.0", style = MaterialTheme.typography.bodyMedium)
+                Text(text = "Build: 20260618", style = MaterialTheme.typography.bodyMedium)
             }
         }
 

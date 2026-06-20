@@ -16,7 +16,7 @@ interface KaraokeApiService {
         @Path("searchTerm") query: String
     ): List<Song>
 
-    @GET("release/{date}.json")
+    @GET("release/{date}/tj.json")
     suspend fun getLatestSongs(
         @Path("date") date: String
     ): List<Song>

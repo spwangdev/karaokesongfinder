@@ -92,7 +92,7 @@ fun SongSearchScreen(
                 OutlinedTextField(
                     value = songSearchViewModel.searchQuery,
                     onValueChange = { nextText -> songSearchViewModel.searchQuery = nextText },
-                    label = { Text(if (songSearchViewModel.searchBySinger) "Search by Singer" else "Search by Song") },
+                    label = { Text(if (songSearchViewModel.searchBySinger) "Search by Artist" else "Search by Song") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     shape = RoundedCornerShape(24.dp),
