@@ -70,8 +70,8 @@ class SongSearchViewModel(application: Application) : AndroidViewModel(applicati
     // Function called when user clicks "Search"
     fun performSearch() {
         isLoading = true
-        hasSearched = false // Reset searched state at start
-        songList = emptyList() // Clear previous results immediately
+        hasSearched = false
+        songList = emptyList()
         
         viewModelScope.launch {
             try {
@@ -80,13 +80,11 @@ class SongSearchViewModel(application: Application) : AndroidViewModel(applicati
                 } else {
                     apiService.searchSongs(searchQuery)
                 }
-                // Filter out any potential nulls or malformed results if necessary,
-                // but primarily just assign what the API returns.
                 songList = results ?: emptyList()
                 hasSearched = true
             } catch (e: Exception) {
                 songList = emptyList()
-                hasSearched = true // Still set to true so "No results" or error could be shown
+                hasSearched = true
             } finally {
                 isLoading = false
             }
@@ -95,8 +93,6 @@ class SongSearchViewModel(application: Application) : AndroidViewModel(applicati
 
     fun isNetworkAvailable(context: Context): Boolean {
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-        // Get the currently active network configuration
         val activeNetwork = connectivityManager.activeNetwork ?: return false
         val capabilities = connectivityManager.getNetworkCapabilities(activeNetwork) ?: return false
         return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
@@ -136,11 +132,9 @@ class SongSearchViewModel(application: Application) : AndroidViewModel(applicati
         viewModelScope.launch {
             try {
                 val results = apiService.getLatestSongs(date)
-                // Filter only for brand "tj"
                 _latestSongs.value = results
                 lastFetchedDate = date
             } catch (e: Exception) {
-                Log.e("SongSearchViewModel", "Failed to fetch latest songs", e)
                 _latestSongs.value = emptyList()
                 lastFetchedDate = null
             } finally {
