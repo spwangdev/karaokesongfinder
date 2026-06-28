@@ -142,6 +142,7 @@ fun FavoritesScreen(viewModel: SongSearchViewModel) {
                             Column(modifier = Modifier.fillMaxWidth().padding(end = 75.dp)) {
                                 Text(text = savedSong.title, style = MaterialTheme.typography.titleMedium)
                                 Text(text = "Artist: ${savedSong.singer}", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+                                Text(text = "Released: ${savedSong.release}", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
                                 Text(text = "No. ${savedSong.no}", style = MaterialTheme.typography.bodySmall.copy(fontSize = 14.sp, fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.primary)
                             }
 

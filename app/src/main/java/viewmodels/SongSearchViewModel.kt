@@ -104,7 +104,15 @@ class SongSearchViewModel(application: Application) : AndroidViewModel(applicati
 
     fun toggleFavorite(song: Song) {
         viewModelScope.launch {
-            val savedSong = SavedSong(no = song.no, title = song.title, singer = song.singer)
+            val savedSong = SavedSong(
+                no = song.no,
+                title = song.title,
+                singer = song.singer,
+                release = song.release,
+                brand = song.brand,
+                composer = song.composer,
+                lyricist = song.lyricist
+            )
             if (isSongFavorited(song.no)) {
                 dao.deleteFavorite(savedSong)
             } else {

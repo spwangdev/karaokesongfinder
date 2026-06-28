@@ -236,6 +236,11 @@ fun SongRow(song: Song, viewModel: SongSearchViewModel) {
                     color = Color.Gray
                 )
                 Text(
+                    text = "Released: ${song.release}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray
+                )
+                Text(
                     text = "No. ${song.no}",
                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.primary
