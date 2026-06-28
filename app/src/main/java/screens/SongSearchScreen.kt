@@ -317,7 +317,7 @@ fun SongRow(song: Song, viewModel: SongSearchViewModel) {
                     onClick = {
                         val clipboard =
                             context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                        val clip = ClipData.newPlainText("Song Number", song.no)
+                        val clip = ClipData.newPlainText("Song Details", "${song.title} - ${song.singer} (${song.no})")
                         clipboard.setPrimaryClip(clip)
                     },
                     modifier = Modifier.size(44.dp),

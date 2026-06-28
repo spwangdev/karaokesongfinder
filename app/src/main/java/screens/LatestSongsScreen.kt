@@ -240,7 +240,7 @@ fun LatestSongRow(song: entities.api.Song, viewModel: SongSearchViewModel) {
                     onClick = {
                         val clipboard =
                             context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                        val clip = android.content.ClipData.newPlainText("Song Number", song.no)
+                        val clip = android.content.ClipData.newPlainText("Song Details", "${song.title} - ${song.singer} (${song.no})")
                         clipboard.setPrimaryClip(clip)
                     },
                     modifier = Modifier.size(44.dp),

@@ -197,7 +197,7 @@ fun FavoritesScreen(viewModel: SongSearchViewModel) {
                                 OutlinedIconButton(
                                     onClick = {
                                         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                                        val clip = ClipData.newPlainText("Song Number", savedSong.no)
+                                        val clip = ClipData.newPlainText("Song Details", "${savedSong.title} - ${savedSong.singer} (${savedSong.no})")
                                         clipboard.setPrimaryClip(clip)
                                     },
                                     modifier = Modifier.size(44.dp),
