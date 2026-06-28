@@ -3,6 +3,7 @@ package screens
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,14 +29,15 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
@@ -248,14 +250,15 @@ fun SongRow(song: Song, viewModel: SongSearchViewModel) {
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
-        Row(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(12.dp)
         ) {
             Column(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(end = 120.dp) // Leave space for buttons
             ) {
                 Text(
                     text = song.title,
@@ -278,45 +281,55 @@ fun SongRow(song: Song, viewModel: SongSearchViewModel) {
                 )
             }
 
-            IconButton(
-                onClick = { showInfoModal = true },
-                modifier = Modifier.size(32.dp)
+            Row(
+                modifier = Modifier.align(Alignment.BottomEnd),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Default.Info,
-                    contentDescription = "Song Info",
-                    tint = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
+                OutlinedIconButton(
+                    onClick = { showInfoModal = true },
+                    modifier = Modifier.size(38.dp),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
+                    colors = IconButtonDefaults.outlinedIconButtonColors(contentColor = MaterialTheme.colorScheme.secondary)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = "Song Info",
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
 
-            IconButton(
-                onClick = { viewModel.toggleFavorite(song) },
-                modifier = Modifier.size(32.dp)
-            ) {
-                Icon(
-                    imageVector = if (isFavorited) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                    contentDescription = "Toggle Favorite",
-                    tint = if (isFavorited) Color(0xFFE53E3E) else MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
+                OutlinedIconButton(
+                    onClick = { viewModel.toggleFavorite(song) },
+                    modifier = Modifier.size(38.dp),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
+                    colors = IconButtonDefaults.outlinedIconButtonColors(
+                        contentColor = if (isFavorited) Color(0xFFE53E3E) else MaterialTheme.colorScheme.secondary
+                    )
+                ) {
+                    Icon(
+                        imageVector = if (isFavorited) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        contentDescription = "Toggle Favorite",
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
 
-            IconButton(
-                onClick = {
-                    val clipboard =
-                        context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    val clip = ClipData.newPlainText("Song Number", song.no)
-                    clipboard.setPrimaryClip(clip)
-                },
-                modifier = Modifier.size(32.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ContentCopy,
-                    contentDescription = "Copy Song Number",
-                    tint = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.size(18.dp)
-                )
+                OutlinedIconButton(
+                    onClick = {
+                        val clipboard =
+                            context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clip = ClipData.newPlainText("Song Number", song.no)
+                        clipboard.setPrimaryClip(clip)
+                    },
+                    modifier = Modifier.size(38.dp),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
+                    colors = IconButtonDefaults.outlinedIconButtonColors(contentColor = MaterialTheme.colorScheme.secondary)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ContentCopy,
+                        contentDescription = "Copy Song Number",
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
         }
     }

@@ -1,10 +1,15 @@
 package screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -127,7 +132,126 @@ fun LatestSongsScreen(viewModel: SongSearchViewModel) {
                 contentPadding = PaddingValues(bottom = 90.dp)
             ) {
                 items(songList) { song ->
-                    SongRow(song = song, viewModel = viewModel)
+                    LatestSongRow(song = song, viewModel = viewModel)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun LatestSongRow(song: entities.api.Song, viewModel: SongSearchViewModel) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val favoriteList by viewModel.favoriteSongs.collectAsState()
+    val isFavorited = favoriteList.any { it.no == song.no }
+    var showInfoModal by remember { mutableStateOf(false) }
+
+    if (showInfoModal) {
+        AlertDialog(
+            onDismissRequest = { showInfoModal = false },
+            title = { Text(text = "Song Details", fontWeight = FontWeight.Bold) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    InfoItem(label = "Title", value = song.title)
+                    InfoItem(label = "Artist", value = song.singer)
+                    InfoItem(label = "Release", value = song.release)
+                    InfoItem(label = "Brand", value = song.brand)
+                    InfoItem(label = "Composer", value = song.composer)
+                    InfoItem(label = "Lyricist", value = song.lyricist)
+                    InfoItem(label = "No.", value = song.no)
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showInfoModal = false }) {
+                    Text("Close")
+                }
+            }
+        )
+    }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(end = 120.dp)
+            ) {
+                Text(
+                    text = song.title,
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = "Artist: ${song.singer}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray
+                )
+                Text(
+                    text = "Released: ${song.release}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray
+                )
+                Text(
+                    text = "No. ${song.no}",
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            Row(
+                modifier = Modifier.align(Alignment.BottomEnd),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                OutlinedIconButton(
+                    onClick = { showInfoModal = true },
+                    modifier = Modifier.size(38.dp),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
+                    colors = IconButtonDefaults.outlinedIconButtonColors(contentColor = MaterialTheme.colorScheme.secondary)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = "Song Info",
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+
+                OutlinedIconButton(
+                    onClick = { viewModel.toggleFavorite(song) },
+                    modifier = Modifier.size(38.dp),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
+                    colors = IconButtonDefaults.outlinedIconButtonColors(
+                        contentColor = if (isFavorited) Color(0xFFE53E3E) else MaterialTheme.colorScheme.secondary
+                    )
+                ) {
+                    Icon(
+                        imageVector = if (isFavorited) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        contentDescription = "Toggle Favorite",
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+
+                OutlinedIconButton(
+                    onClick = {
+                        val clipboard =
+                            context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                        val clip = android.content.ClipData.newPlainText("Song Number", song.no)
+                        clipboard.setPrimaryClip(clip)
+                    },
+                    modifier = Modifier.size(38.dp),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
+                    colors = IconButtonDefaults.outlinedIconButtonColors(contentColor = MaterialTheme.colorScheme.secondary)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ContentCopy,
+                        contentDescription = "Copy Song Number",
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
             }
         }
