@@ -258,7 +258,7 @@ fun SongRow(song: Song, viewModel: SongSearchViewModel) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(end = 120.dp) // Leave space for buttons
+                    .padding(end = 150.dp) // Leave space for buttons
             ) {
                 Text(
                     text = song.title,
@@ -283,24 +283,24 @@ fun SongRow(song: Song, viewModel: SongSearchViewModel) {
 
             Row(
                 modifier = Modifier.align(Alignment.BottomEnd),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 OutlinedIconButton(
                     onClick = { showInfoModal = true },
-                    modifier = Modifier.size(38.dp),
+                    modifier = Modifier.size(44.dp),
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
                     colors = IconButtonDefaults.outlinedIconButtonColors(contentColor = MaterialTheme.colorScheme.secondary)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Info,
                         contentDescription = "Song Info",
-                        modifier = Modifier.size(22.dp)
+                        modifier = Modifier.size(24.dp)
                     )
                 }
 
                 OutlinedIconButton(
                     onClick = { viewModel.toggleFavorite(song) },
-                    modifier = Modifier.size(38.dp),
+                    modifier = Modifier.size(44.dp),
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
                     colors = IconButtonDefaults.outlinedIconButtonColors(
                         contentColor = if (isFavorited) Color(0xFFE53E3E) else MaterialTheme.colorScheme.secondary
@@ -309,7 +309,7 @@ fun SongRow(song: Song, viewModel: SongSearchViewModel) {
                     Icon(
                         imageVector = if (isFavorited) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                         contentDescription = "Toggle Favorite",
-                        modifier = Modifier.size(22.dp)
+                        modifier = Modifier.size(24.dp)
                     )
                 }
 
@@ -320,14 +320,14 @@ fun SongRow(song: Song, viewModel: SongSearchViewModel) {
                         val clip = ClipData.newPlainText("Song Number", song.no)
                         clipboard.setPrimaryClip(clip)
                     },
-                    modifier = Modifier.size(38.dp),
+                    modifier = Modifier.size(44.dp),
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
                     colors = IconButtonDefaults.outlinedIconButtonColors(contentColor = MaterialTheme.colorScheme.secondary)
                 ) {
                     Icon(
                         imageVector = Icons.Default.ContentCopy,
                         contentDescription = "Copy Song Number",
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(22.dp)
                     )
                 }
             }

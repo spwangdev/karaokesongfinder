@@ -165,7 +165,7 @@ fun FavoritesScreen(viewModel: SongSearchViewModel) {
                     Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
                         Box(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
 
-                            Column(modifier = Modifier.fillMaxWidth().padding(end = 120.dp)) {
+                            Column(modifier = Modifier.fillMaxWidth().padding(end = 150.dp)) {
                                 Text(text = savedSong.title, style = MaterialTheme.typography.titleMedium)
                                 Text(text = "Artist: ${savedSong.singer}", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
                                 Text(text = "Released: ${savedSong.release}", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
@@ -174,24 +174,24 @@ fun FavoritesScreen(viewModel: SongSearchViewModel) {
 
                             Row(
                                 modifier = Modifier.align(Alignment.BottomEnd),
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 OutlinedIconButton(
                                     onClick = { songToShowInfo = savedSong },
-                                    modifier = Modifier.size(38.dp),
+                                    modifier = Modifier.size(44.dp),
                                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
                                     colors = IconButtonDefaults.outlinedIconButtonColors(contentColor = MaterialTheme.colorScheme.secondary)
                                 ) {
-                                    Icon(imageVector = Icons.Default.Info, contentDescription = "Info", modifier = Modifier.size(22.dp))
+                                    Icon(imageVector = Icons.Default.Info, contentDescription = "Info", modifier = Modifier.size(24.dp))
                                 }
 
                                 OutlinedIconButton(
                                     onClick = { songToDelete = savedSong },
-                                    modifier = Modifier.size(38.dp),
+                                    modifier = Modifier.size(44.dp),
                                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
                                     colors = IconButtonDefaults.outlinedIconButtonColors(contentColor = Color.Gray)
                                 ) {
-                                    Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete", modifier = Modifier.size(18.dp))
+                                    Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete", modifier = Modifier.size(22.dp))
                                 }
 
                                 OutlinedIconButton(
@@ -200,11 +200,11 @@ fun FavoritesScreen(viewModel: SongSearchViewModel) {
                                         val clip = ClipData.newPlainText("Song Number", savedSong.no)
                                         clipboard.setPrimaryClip(clip)
                                     },
-                                    modifier = Modifier.size(38.dp),
+                                    modifier = Modifier.size(44.dp),
                                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
                                     colors = IconButtonDefaults.outlinedIconButtonColors(contentColor = MaterialTheme.colorScheme.secondary)
                                 ) {
-                                    Icon(imageVector = Icons.Default.ContentCopy, contentDescription = "Copy", modifier = Modifier.size(18.dp))
+                                    Icon(imageVector = Icons.Default.ContentCopy, contentDescription = "Copy", modifier = Modifier.size(22.dp))
                                 }
                             }
                         }
