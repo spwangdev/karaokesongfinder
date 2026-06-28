@@ -153,7 +153,7 @@ fun SongSearchScreen(
                     FilterChip(
                         selected = songSearchViewModel.searchBySinger,
                         onClick = { songSearchViewModel.searchBySinger = true },
-                        label = { Text("Singer") },
+                        label = { Text("Artist") },
                         leadingIcon = if (songSearchViewModel.searchBySinger) {
                             {
                                 Icon(
