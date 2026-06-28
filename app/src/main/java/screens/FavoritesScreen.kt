@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -30,6 +31,7 @@ fun FavoritesScreen(viewModel: SongSearchViewModel) {
     var filterQuery by remember { mutableStateOf("") }
     val context = LocalContext.current
     var songToDelete by remember { mutableStateOf<SavedSong?>(null) }
+    var songToShowInfo by remember { mutableStateOf<SavedSong?>(null) }
 
     val filteredSongs = remember(favoriteSongs, filterQuery) {
         val filtered = if (filterQuery.isBlank()) {
@@ -42,6 +44,29 @@ fun FavoritesScreen(viewModel: SongSearchViewModel) {
             }
         }
         filtered.sortedBy { it.title }
+    }
+
+    if (songToShowInfo != null) {
+        AlertDialog(
+            onDismissRequest = { songToShowInfo = null },
+            title = { Text(text = "Song Information", fontWeight = FontWeight.Bold) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    InfoItem(label = "Title", value = songToShowInfo?.title ?: "")
+                    InfoItem(label = "Artist", value = songToShowInfo?.singer ?: "")
+                    InfoItem(label = "Release", value = songToShowInfo?.release ?: "")
+                    InfoItem(label = "Brand", value = songToShowInfo?.brand ?: "")
+                    InfoItem(label = "Composer", value = songToShowInfo?.composer ?: "")
+                    InfoItem(label = "Lyricist", value = songToShowInfo?.lyricist ?: "")
+                    InfoItem(label = "No.", value = songToShowInfo?.no ?: "")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { songToShowInfo = null }) {
+                    Text("Close")
+                }
+            }
+        )
     }
 
     if (songToDelete != null) {
@@ -150,6 +175,13 @@ fun FavoritesScreen(viewModel: SongSearchViewModel) {
                                 modifier = Modifier.align(Alignment.BottomEnd),
                                 horizontalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
+                                IconButton(
+                                    onClick = { songToShowInfo = savedSong },
+                                    modifier = Modifier.size(32.dp)
+                                ) {
+                                    Icon(imageVector = Icons.Default.Info, contentDescription = "Info", tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
+                                }
+
                                 IconButton(
                                     onClick = { songToDelete = savedSong },
                                     modifier = Modifier.size(32.dp)
